@@ -1,39 +1,51 @@
 import { Avatar, Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { ChangeEvent, useEffect, useState } from "react";
-import { getUser } from "./services/api";
+import axios from "axios";
 
-// Definição do tipo de usuário
 export type User = {
-  avatar_url: string;
-  name: string;
-  html_url: string;
+  avatar: string;
+  first_name: string;
+  last_name: string;
+  email: string;
 };
 
 function App() {
-  // Definição dos estados do usuário e da entrada
-  const [user, setUser] = useState<User>({ avatar_url: "", html_url: "", name: "" });
+  const [user, setUser] = useState<User>({ avatar: "", first_name: "", last_name: "", email: "" });
   const [input, setInput] = useState("");
 
-  // Função assíncrona para lidar com o clique no botão
   const handleClick = async () => {
-    const userData = await getUser(input);
+    const userData = await fetchUser(input);
     setUser(userData);
   };
 
-  // Função para lidar com a alteração do campo de entrada
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInput(event.target.value);
   };
 
-  // Efeito colateral para buscar os dados do usuário ao montar o componente
   useEffect(() => {
     async function listUser() {
-      const userData = await getUser(input);
+      const userData = await fetchUser(input);
       setUser(userData);
     }
 
     listUser();
   }, []);
+
+  const fetchUser = async (userId: string): Promise<User> => {
+    try {
+      const response = await axios.get(`https://reqres.in/api/users/${userId}`);
+      const userData = response.data.data;
+      return {
+        avatar: userData.avatar,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        email: userData.email,
+      };
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return { avatar: "", first_name: "", last_name: "", email: "" };
+    }
+  };
 
   return (
     <>
@@ -46,21 +58,18 @@ function App() {
           rowGap: "50px",
         }}
       >
-        {/* Campo de texto para pesquisa */}
         <TextField
           value={input}
-          label="Search field"
-          type="search"
+          label="User ID"
+          type="number"
           variant="filled"
           onChange={handleChange}
         />
 
-        {/* Botão para iniciar a busca */}
         <Button variant="outlined" onClick={handleClick}>
-          Primary
+          Search
         </Button>
 
-        {/* Grid para exibir os detalhes do usuário */}
         <Grid
           sx={{
             width: "600px",
@@ -71,16 +80,9 @@ function App() {
             color: "white",
           }}
         >
-          {/* Avatar do usuário */}
-          <Avatar src={user.avatar_url} />
-
-          {/* Nome do usuário */}
-          <Typography>{user.name}</Typography>
-
-          {/* Link para o repositório do usuário */}
-          <Typography>
-            <a href={user.html_url}>Link do Repositório</a>
-          </Typography>
+          <Avatar src={user.avatar} />
+          <Typography>{`${user.first_name} ${user.last_name}`}</Typography>
+          <Typography>{user.email}</Typography>
         </Grid>
       </Box>
     </>
