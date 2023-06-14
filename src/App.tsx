@@ -1,7 +1,8 @@
-import { Avatar, Box, Button, Grid, TextField, Typography } from "@mui/material"
+import { Avatar, Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { ChangeEvent, useEffect, useState } from "react";
 import { getUser } from "./services/api";
 
+// Definição do tipo de usuário
 export type User = {
   avatar_url: string;
   name: string;
@@ -9,28 +10,29 @@ export type User = {
 };
 
 function App() {
-  const [user, setUser] = useState<User>({avatar_url:"",html_url:"",name:""});
+  // Definição dos estados do usuário e da entrada
+  const [user, setUser] = useState<User>({ avatar_url: "", html_url: "", name: "" });
   const [input, setInput] = useState("");
 
+  // Função assíncrona para lidar com o clique no botão
   const handleClick = async () => {
     const userData = await getUser(input);
     setUser(userData);
   };
 
+  // Função para lidar com a alteração do campo de entrada
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInput(event.target.value);
   };
 
+  // Efeito colateral para buscar os dados do usuário ao montar o componente
   useEffect(() => {
-    // Função para buscar os dados do usuário ao montar o componente
-    async function fetchUser() {
-      if (input) {
-        const userData = await getUser(input);
-        setUser(userData);
-      }
+    async function listUser() {
+      const userData = await getUser(input);
+      setUser(userData);
     }
 
-    fetchUser();
+    listUser();
   }, []);
 
   return (
@@ -44,6 +46,7 @@ function App() {
           rowGap: "50px",
         }}
       >
+        {/* Campo de texto para pesquisa */}
         <TextField
           value={input}
           label="Search field"
@@ -52,38 +55,34 @@ function App() {
           onChange={handleChange}
         />
 
+        {/* Botão para iniciar a busca */}
         <Button variant="outlined" onClick={handleClick}>
           Primary
         </Button>
 
-        
-        
-        <Grid sx={{
-        width: '600px',
-        background: 'purple',
-        border: '1px solid black',
-        borderRadius: '5px',
-        justifyContent: 'center',
-        color:'white' // Adicionando alinhamento horizontal centralizado
-      }}
-    >
-        <Avatar src={user.avatar_url}/>
-      <Typography>
-      {user.name}
-      </Typography>
-      <Typography>
-      <a href={user.html_url}>Link do Repositório</a>
-      </Typography>
-    </Grid>
+        {/* Grid para exibir os detalhes do usuário */}
+        <Grid
+          sx={{
+            width: "600px",
+            background: "purple",
+            border: "1px solid black",
+            borderRadius: "5px",
+            justifyContent: "center",
+            color: "white",
+          }}
+        >
+          {/* Avatar do usuário */}
+          <Avatar src={user.avatar_url} />
 
-      
-    
+          {/* Nome do usuário */}
+          <Typography>{user.name}</Typography>
 
-
-
+          {/* Link para o repositório do usuário */}
+          <Typography>
+            <a href={user.html_url}>Link do Repositório</a>
+          </Typography>
+        </Grid>
       </Box>
-
-      
     </>
   );
 }
