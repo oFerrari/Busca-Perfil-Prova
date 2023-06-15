@@ -2,6 +2,7 @@ import { Avatar, Box, Button, Grid, TextField, Typography } from "@mui/material"
 import { ChangeEvent, useEffect, useState } from "react";
 import axios from "axios";
 
+// Definição do tipo de usuário
 export type User = {
   avatar: string;
   first_name: string;
@@ -10,22 +11,28 @@ export type User = {
 };
 
 function App() {
-  const [user, setUser] = useState<User>({ avatar: "", first_name: "", last_name: "", email: "" });
+  const [user, setUser] = useState<User>({avatar_url:"",html_url:"",name:""});
   const [input, setInput] = useState("");
 
+  // Função assíncrona para lidar com o clique no botão
   const handleClick = async () => {
     const userData = await fetchUser(input);
     setUser(userData);
   };
 
+  // Função para lidar com a alteração do campo de entrada
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInput(event.target.value);
   };
 
+  // Efeito colateral para buscar os dados do usuário ao montar o componente
   useEffect(() => {
-    async function listUser() {
-      const userData = await fetchUser(input);
-      setUser(userData);
+    // Função para buscar os dados do usuário ao montar o componente
+    async function fetchUser() {
+      if (input) {
+        const userData = await getUser(input);
+        setUser(userData);
+      }
     }
 
     listUser();
@@ -58,6 +65,7 @@ function App() {
           rowGap: "50px",
         }}
       >
+        {/* Campo de texto para pesquisa */}
         <TextField
           value={input}
           label="User ID"
@@ -66,28 +74,39 @@ function App() {
           onChange={handleChange}
         />
 
+        {/* Botão para iniciar a busca */}
         <Button variant="outlined" onClick={handleClick}>
           Search
         </Button>
 
-        <Grid
-          sx={{
-            width: "600px",
-            background: "purple",
-            border: "1px solid black",
-            borderRadius: "5px",
-            justifyContent: "center",
-            color: "white",
-          }}
-        >
-          <Avatar src={user.avatar} />
-          <Typography>{`${user.first_name} ${user.last_name}`}</Typography>
-          <Typography>{user.email}</Typography>
-        </Grid>
+        
+        
+        <Grid sx={{
+        width: '600px',
+        background: 'purple',
+        border: '1px solid black',
+        borderRadius: '5px',
+        justifyContent: 'center',
+        color:'white' // Adicionando alinhamento horizontal centralizado
+      }}
+    >
+        <Avatar src={user.avatar_url}/>
+      <Typography>
+      {user.name}
+      </Typography>
+      <Typography>
+      <a href={user.html_url}>Link do Repositório</a>
+      </Typography>
+    </Grid>
+
+      
+    
+
+
+
       </Box>
     </>
   );
 }
 
 export default App;
-
