@@ -1,6 +1,6 @@
 import { Avatar, Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { ChangeEvent, useEffect, useState } from "react";
-import { getUser } from "./services/api";
+import axios from "axios";
 
 export type User = {
   avatar: string;
@@ -14,7 +14,7 @@ function App() {
   const [input, setInput] = useState("");
 
   const handleClick = async () => {
-    const userData = await getUser(input);
+    const userData = await fetchUser(input);
     setUser(userData);
   };
 
@@ -24,12 +24,28 @@ function App() {
 
   useEffect(() => {
     async function listUser() {
-      const userData = await getUser(input);
+      const userData = await fetchUser(input);
       setUser(userData);
     }
 
     listUser();
   }, []);
+
+  const fetchUser = async (userId: string): Promise<User> => {
+    try {
+      const response = await axios.get(`https://reqres.in/api/users/${userId}`);
+      const userData = response.data.data;
+      return {
+        avatar: userData.avatar,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        email: userData.email,
+      };
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return { avatar: "", first_name: "", last_name: "", email: "" };
+    }
+  };
 
   return (
     <>
@@ -42,21 +58,18 @@ function App() {
           rowGap: "50px",
         }}
       >
-        {/* Campo de texto para pesquisa */}
         <TextField
           value={input}
-          label="Search field"
-          type="search"
+          label="User ID"
+          type="number"
           variant="filled"
           onChange={handleChange}
         />
 
-        {/* Botão para iniciar a busca */}
         <Button variant="outlined" onClick={handleClick}>
-          Primary
+          Search
         </Button>
 
-        {/* Grid para exibir os detalhes do usuário */}
         <Grid
           sx={{
             width: "600px",
@@ -67,13 +80,8 @@ function App() {
             color: "white",
           }}
         >
-          {/* Avatar do usuário */}
           <Avatar src={user.avatar} />
-
-          {/* Nome do usuário */}
           <Typography>{`${user.first_name} ${user.last_name}`}</Typography>
-
-          {/* Email do usuário */}
           <Typography>{user.email}</Typography>
         </Grid>
       </Box>
@@ -82,3 +90,4 @@ function App() {
 }
 
 export default App;
+
